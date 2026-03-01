@@ -1,41 +1,40 @@
 #!/usr/bin/env python3
-from __future__ import annotations
-
 import json
 import os
 from pathlib import Path
 
 
-def _read_text(path: Path) -> str:
-    return path.read_text(encoding="utf-8")
+def sanitize_path(env_name: str, fallback: str) -> Path:
+    val = os.environ.get(env_name, "").strip()
+    # Ignore leaked .codex paths and missing files; use repo defaults.
+    if (not val) or val.startswith(".codex/") or "/.codex/" in val:
+        return Path(fallback)
+    p = Path(val)
+    if env_name in ("PRD_FILE", "RULES_FILE") and not p.exists():
+        return Path(fallback)
+    return p
 
+MAX_RULES_CHARS = 1500  # keep prompts small
 
-def _read_json(path: Path) -> dict:
-    return json.loads(_read_text(path))
+def main() -> None:
+    prd_file = sanitize_path("PRD_FILE", "ralph/prd.json")
+    rules_file = sanitize_path("RULES_FILE", "ralph/rules.md")
 
+    prd = json.loads(prd_file.read_text(encoding="utf-8"))
 
-def _next_pending_story(prd: dict) -> dict | None:
+    story = None
     for s in prd.get("stories", []):
         if not s.get("passes"):
-            return s
-    return None
-
-
-def main() -> int:
-    prd_file = Path(os.environ.get("PRD_FILE", "ralph/prd.json"))
-    rules_file = Path(os.environ.get("RULES_FILE", "ralph/rules.md"))
-
-    prd = _read_json(prd_file)
-    story = _next_pending_story(prd)
+            story = s
+            break
 
     rules = ""
     if rules_file.exists():
-        rules = _read_text(rules_file).strip()
+        rules = rules_file.read_text(encoding="utf-8")
+        rules = rules[:MAX_RULES_CHARS]
 
-    # Token-minimal prompt: keep it short and precise.
-    # The runner enforces: no eval, strict bash, no push, WSL canonical.
-    lines: list[str] = []
-    lines.append("You are implementing the next pending story for this repo.")
+    lines = []
+    lines.append("Implement the next pending story for this repo.")
     lines.append("")
     lines.append("Hard requirements:")
     lines.append("- WSL/Linux under ~/coding is canonical.")
@@ -45,32 +44,16 @@ def main() -> int:
     lines.append("- No push. Human approval required.")
     lines.append("")
     if rules:
-        # Keep rules bounded to avoid prompt bloat.
-        rules_snip = rules
-        if len(rules_snip) > 2000:
-            rules_snip = rules_snip[:2000] + "\n... (truncated)\n"
         lines.append("Repo rules (excerpt):")
-        lines.append(rules_snip)
+        lines.append(rules)
         lines.append("")
+    if story:
+        lines.append("Story (JSON):")
+        lines.append(json.dumps(story, ensure_ascii=False))
+    else:
+        lines.append("No pending stories. Do not change anything; explain what you checked.")
 
-    if story is None:
-        lines.append("No pending stories. Do not change anything. Explain what you checked.")
-        print("\n".join(lines))
-        return 0
-
-    # Keep story compact: id + title + any extra fields present.
-    lines.append("Story to implement (JSON):")
-    lines.append(json.dumps(story, indent=2, ensure_ascii=False))
-    lines.append("")
-    lines.append("Guidance:")
-    lines.append("- Make the smallest safe change that advances this story.")
-    lines.append("- After changes: run repo verification (VERIFY_CMD) and ensure it passes.")
-    lines.append("- If the story is completed, update ralph/prd.json to mark it passes=true.")
-    lines.append("")
-    lines.append("Now implement.")
     print("\n".join(lines))
-    return 0
-
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()
