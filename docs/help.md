@@ -7,7 +7,11 @@ If you don’t know what WSL is, start in **Windows PowerShell**:
 2) Change directory to the repo folder on Windows (where this file exists)
 3) Run:
 
-    powershell -ExecutionPolicy Bypass -File .\scripts\PHASE0_WINDOWS.ps1
+    powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\PHASE0_WINDOWS.ps1
+
+Or double-click:
+
+    scripts\PHASE0_WINDOWS.cmd
 
 This installs/initializes WSL + Ubuntu (if needed), installs Python + Git, and creates `~/coding`.
 
