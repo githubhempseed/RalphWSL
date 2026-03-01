@@ -57,6 +57,24 @@ PRD_FILE="${PRD_FILE:-ralph/prd.json}"
 RULES_FILE="${RULES_FILE:-ralph/rules.md}"
 VERIFY_CMD="${VERIFY_CMD:-scripts/verify.sh}"
 
+# Noob safety: ignore leaked env vars that point into .codex/ or missing paths.
+sanitize_path() {
+  local name="$1"
+  local val="${!name:-}"
+  local fallback="$2"
+  if [[ -z "$val" ]]; then
+    printf -v "$name" "%s" "$fallback"
+    return 0
+  fi
+  if [[ "$val" == .codex/* || "$val" == */.codex/* || ! -f "$val" ]]; then
+    echo "WARN: $name was set to an unsafe/missing path ($val); resetting to $fallback" >&2
+    printf -v "$name" "%s" "$fallback"
+  fi
+}
+
+sanitize_path PRD_FILE "ralph/prd.json"
+sanitize_path RULES_FILE "ralph/rules.md"
+
 need_cmd() {
   command -v "$1" >/dev/null 2>&1 || {
     echo "Missing required command: $1" >&2
@@ -100,7 +118,11 @@ dirty_tree() {
 }
 
 run_codex_once() {
-  need_cmd codex
+  scripts/codex_once.sh
+  return $?
+
+  # (legacy path below, kept intentionally unreachable)
+
 
   if [[ ! -f scripts/build_prompt.py ]]; then
     echo "Missing scripts/build_prompt.py (required for --codex)" >&2

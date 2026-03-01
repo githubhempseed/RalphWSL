@@ -10,11 +10,10 @@ echo "== RalphWSL doctor =="
 echo "pwd=$(pwd)"
 echo "user=$(whoami)"
 echo "uname=$(uname -sr)"
-echo "home=$HOME"
 echo
 
-echo "== Commands =="
-for c in git python python3 codex; do
+echo "== Tooling =="
+for c in git python codex; do
   if command -v "$c" >/dev/null 2>&1; then
     echo "OK: $c -> $(command -v "$c")"
   else
@@ -23,25 +22,21 @@ for c in git python python3 codex; do
 done
 echo
 
-echo "== Repo files =="
+echo "== Repo sanity =="
 for f in ralph/prd.json ralph/rules.md scripts/ralph.sh scripts/verify.sh; do
-  if [[ -f "$f" ]]; then
-    echo "OK: $f"
-  else
-    echo "MISSING: $f"
-  fi
+  [[ -f "$f" ]] && echo "OK: $f" || echo "MISSING: $f"
 done
 echo
 
-echo "== Git state (no pager) =="
+echo "== Env (relevant) =="
+echo "PRD_FILE=${PRD_FILE-<unset>}"
+echo "RULES_FILE=${RULES_FILE-<unset>}"
+echo "VERIFY_CMD=${VERIFY_CMD-<unset>}"
+echo
+
+echo "== Git status =="
 git status
 echo
 
-echo "== Verification =="
+echo "== Verify =="
 ./scripts/verify.sh
-echo
-
-echo "Doctor tips:"
-echo "- If you started in /mnt/*, always: cd ~/coding/RalphWSL"
-echo "- Phase 0 (Windows beginners): scripts\\PHASE0_WINDOWS.cmd"
-echo "- Next: ./scripts/ralph.sh --once"
