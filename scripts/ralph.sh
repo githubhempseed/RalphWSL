@@ -54,6 +54,13 @@ fi
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
+### AUTO DOCTOR ###
+# Run doctor non-fatally before anything else.
+if [[ -x scripts/doctor.sh ]]; then
+  scripts/doctor.sh || true
+fi
+
+
 PRD_FILE="${PRD_FILE:-ralph/prd.json}"
 RULES_FILE="${RULES_FILE:-ralph/rules.md}"
 VERIFY_CMD="${VERIFY_CMD:-scripts/verify.sh}"
