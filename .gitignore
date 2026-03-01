@@ -4,3 +4,7 @@
 .codex/
 .tmp/
 *.zip
+
+# accidental paste / scratch files
+tatus
+"ummary:\""

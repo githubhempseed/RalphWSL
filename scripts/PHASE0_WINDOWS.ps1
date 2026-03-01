@@ -1,6 +1,6 @@
 # RalphWSL Phase 0 (Windows): get a total beginner to a working WSL + Ubuntu + Python + git + ~/coding
 # Run from Windows PowerShell:
-#   powershell -ExecutionPolicy Bypass -File .\scripts\phase0.ps1
+#   powershell -ExecutionPolicy Bypass -File .\scripts\PHASE0_WINDOWS.ps1
 #
 # Notes:
 # - Some steps may require a reboot.
