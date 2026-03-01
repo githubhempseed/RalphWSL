@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Minimal verification for the runner itself.
+# Minimal verification that is portable and cheap.
 bash -n scripts/ralph.sh
 
-# Optional: add more checks later (shellcheck, json parse smoke, --help output)
 python - <<'PY'
 import json
 from pathlib import Path
