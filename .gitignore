@@ -1,0 +1,6 @@
+
+# RalphWSL local artifacts (never commit)
+.logs/
+.codex/
+.tmp/
+*.zip

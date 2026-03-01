@@ -1,0 +1,10 @@
+{
+  "project": "RalphWSL",
+  "stories": [
+    {
+      "id": "S1",
+      "title": "Generalize and harden the runner",
+      "passes": false
+    }
+  ]
+}
