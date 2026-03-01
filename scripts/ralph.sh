@@ -6,7 +6,7 @@ cd "$REPO_ROOT"
 
 PRD_FILE="${PRD_FILE:-ralph/prd.json}"
 RULES_FILE="${RULES_FILE:-ralph/rules.md}"
-VERIFY_CMD="${VERIFY_CMD:-bash -n scripts/ralph.sh}"
+VERIFY_CMD="${VERIFY_CMD:-scripts/verify.sh}"
 
 need_cmd() {
   command -v "$1" >/dev/null 2>&1 || {
