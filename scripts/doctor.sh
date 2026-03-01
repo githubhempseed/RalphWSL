@@ -52,6 +52,28 @@ for f in ralph/prd.json ralph/rules.md scripts/ralph.sh scripts/verify.sh; do
 done
 
 echo
+
+echo
+echo "== Env safety check =="
+
+unsafe=0
+
+if [[ "${PRD_FILE:-}" == .codex/* ]]; then
+  echo "WARNING: Unsafe PRD_FILE override detected: $PRD_FILE"
+  unsafe=1
+fi
+
+if [[ "${RULES_FILE:-}" == .codex/* ]]; then
+  echo "WARNING: Unsafe RULES_FILE override detected: $RULES_FILE"
+  unsafe=1
+fi
+
+if [[ "$unsafe" -eq 1 ]]; then
+  echo "These overrides are ignored by ralph.sh for safety."
+  echo "You can clear them with:"
+  echo "  unset PRD_FILE RULES_FILE VERIFY_CMD"
+fi
+
 echo "== Env (relevant) =="
 echo "PRD_FILE=${PRD_FILE:-<unset>}"
 echo "RULES_FILE=${RULES_FILE:-<unset>}"
