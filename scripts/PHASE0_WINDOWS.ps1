@@ -10,6 +10,13 @@
 $ErrorActionPreference = "Stop"
 
 Write-Host "== RalphWSL Phase 0: Windows -> WSL readiness =="
+Write-Host ""
+Write-Host "What to expect:"
+Write-Host "  - If WSL/Ubuntu is not installed, Windows may ask to reboot."
+Write-Host "  - The first time Ubuntu opens, it may ask you to create a Linux username/password."
+Write-Host "    After you finish that, close Ubuntu and re-run this script."
+Write-Host ""
+
 
 function Has-Command($name) {
   return $null -ne (Get-Command $name -ErrorAction SilentlyContinue)
@@ -60,7 +67,7 @@ Write-Host "Checking whether the distro is initialized..."
 & wsl -d $targetDistro -- bash -lc "echo WSL_READY; whoami; true" 2>$null
 if ($LASTEXITCODE -ne 0) {
   Write-Host ""
-  Write-Host "Ubuntu likely needs first-run initialization (create Linux user/password)."
+  Write-Host "Ubuntu needs first-run initialization (create Linux user/password)."
   Write-Host "Launching Ubuntu now. Complete the prompts, then close the window and re-run Phase 0."
   Write-Host ""
   & wsl -d $targetDistro
@@ -104,6 +111,25 @@ if ($LASTEXITCODE -ne 0) {
   Write-Host "ERROR: WSL setup commands failed. Re-run this script after fixing the issue."
   exit 2
 }
+
+
+Write-Host ""
+Write-Host "MANUAL FALLBACK (if something above fails):"
+Write-Host "  1) In Windows PowerShell:"
+Write-Host "       wsl --install -d Ubuntu"
+Write-Host "     (Reboot if prompted)"
+Write-Host ""
+Write-Host "  2) Open Ubuntu, create your Linux username/password if asked."
+Write-Host ""
+Write-Host "  3) In Ubuntu (WSL), run:"
+Write-Host "       sudo apt-get update -y"
+Write-Host "       sudo apt-get install -y git python3 python3-pip"
+Write-Host "       mkdir -p ~/coding"
+Write-Host ""
+Write-Host "Then put this repo at: ~/coding/RalphWSL"
+Write-Host "and run:"
+Write-Host "  ./scripts/verify.sh"
+Write-Host "  ./scripts/ralph.sh --once"
 
 Write-Host ""
 Write-Host "Phase 0 complete."
