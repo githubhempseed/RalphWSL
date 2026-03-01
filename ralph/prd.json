@@ -5,6 +5,11 @@
       "id": "S1",
       "title": "Generalize and harden the runner",
       "passes": false
+    },
+    {
+      "id": "S2",
+      "title": "New chat handoff and Codex dry-run mode",
+      "passes": false
     }
   ]
 }

@@ -25,6 +25,7 @@ USAGE
 }
 
 ONCE=0
+MODE="once"
 DO_CODEX=0
 
 case "${1:-}" in
@@ -80,6 +81,28 @@ need_cmd() {
     echo "Missing required command: $1" >&2
     exit 2
   }
+run_newchat() {
+  scripts/newchat.sh
+}
+
+run_codex_dry_run() {
+  # Same gates as real codex run, but never calls codex.
+  need_cmd codex
+  if dirty_tree; then
+    echo "DRY-RUN: would NOT run Codex because working tree is dirty."
+    return 2
+  fi
+  if [[ ! -f scripts/build_prompt.py ]]; then
+    echo "DRY-RUN: missing scripts/build_prompt.py"
+    return 2
+  fi
+  echo "DRY-RUN: would run:"
+  echo "  python scripts/build_prompt.py | codex exec"
+  echo
+  echo "DRY-RUN: prompt preview (first 25 lines):"
+  python scripts/build_prompt.py | sed -n '1,25p'
+}
+
 }
 
 need_cmd git
@@ -91,6 +114,17 @@ if [[ ! -f "$PRD_FILE" ]]; then
   echo "PRD_FILE=$PRD_FILE"
   echo "RULES_FILE=$RULES_FILE"
   echo "VERIFY_CMD=$VERIFY_CMD"
+
+if [[ "$MODE" == "newchat" ]]; then
+  run_newchat
+  exit 0
+fi
+
+if [[ "$MODE" == "codex_dry_run" ]]; then
+  run_codex_dry_run
+  exit $?
+fi
+
   echo "PRD_FILE not found: $PRD_FILE" >&2
   exit 2
 fi
@@ -137,6 +171,17 @@ echo "RalphWSL runner initialized."
 echo "PRD_FILE=$PRD_FILE"
 echo "RULES_FILE=$RULES_FILE"
 echo "VERIFY_CMD=$VERIFY_CMD"
+
+if [[ "$MODE" == "newchat" ]]; then
+  run_newchat
+  exit 0
+fi
+
+if [[ "$MODE" == "codex_dry_run" ]]; then
+  run_codex_dry_run
+  exit $?
+fi
+
 
 # Token + safety discipline: never run Codex on a dirty tree.
 if dirty_tree; then
