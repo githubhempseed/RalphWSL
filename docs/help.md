@@ -7,7 +7,9 @@ If you don’t know what WSL is, start in **Windows PowerShell**:
 2) Change directory to the repo folder on Windows (where this file exists)
 3) Run:
 
-    powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\PHASE0_WINDOWS.ps1
+    powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\PHASE0_WINDOWS.ps1 -RepoUrl <GIT_URL>
+
+(RepoUrl is optional; if provided, Phase 0 will clone into ~/coding/RalphWSL.)
 
 Or double-click:
 

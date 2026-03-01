@@ -7,6 +7,10 @@
 # - The very first Ubuntu launch may ask the user to create a Linux username/password.
 # - This script avoids assuming the user starts in WSL.
 
+param(
+  [string]$RepoUrl = ""
+)
+
 $ErrorActionPreference = "Stop"
 
 Write-Host "== RalphWSL Phase 0: Windows -> WSL readiness =="
@@ -132,4 +136,37 @@ Write-Host "  ./scripts/verify.sh"
 Write-Host "  ./scripts/ralph.sh --once"
 
 Write-Host ""
+
+Write-Host ""
+Write-Host "OPTIONAL REPO CLONE:"
+if (-not [string]::IsNullOrWhiteSpace($RepoUrl)) {
+  Write-Host "RepoUrl provided. Attempting to clone into ~/coding/RalphWSL inside WSL..."
+  $clonePayload = @'
+set -euo pipefail
+mkdir -p ~/coding
+if [ -d "$HOME/coding/RalphWSL/.git" ]; then
+  echo "Repo already exists at ~/coding/RalphWSL"
+  exit 0
+fi
+if [ -e "$HOME/coding/RalphWSL" ] && [ ! -d "$HOME/coding/RalphWSL/.git" ]; then
+  echo "Path exists but is not a git repo: ~/coding/RalphWSL"
+  echo "Move it aside or delete it, then re-run Phase 0."
+  exit 2
+fi
+git clone "'"$RepoUrl"'" "$HOME/coding/RalphWSL"
+echo "Clone complete: ~/coding/RalphWSL"
+'@
+  & wsl -d $targetDistro -- bash -lc $clonePayload
+  if ($LASTEXITCODE -ne 0) {
+    Write-Host "NOTE: Clone did not complete. You can clone manually inside Ubuntu:"
+    Write-Host "  cd ~/coding"
+    Write-Host "  git clone <URL> RalphWSL"
+  }
+} else {
+  Write-Host "No RepoUrl provided. To clone the repo inside WSL:"
+  Write-Host "  wsl"
+  Write-Host "  cd ~/coding"
+  Write-Host "  git clone <URL> RalphWSL"
+}
+
 Write-Host "Phase 0 complete."
